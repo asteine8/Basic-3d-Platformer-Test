@@ -27,7 +27,8 @@ public class PlayerController : MonoBehaviour
     public float gravity;
     [Tooltip("Multiplies gravity when in air, halfed when rising and jump button is still pressed")]
     public float fallMultiplier;
-    public float maxSpeed;
+    public float runSpeed;
+    public float walkSpeed;
 
     [Header("Collision")]
     public bool onGround;
@@ -50,6 +51,7 @@ public class PlayerController : MonoBehaviour
 
         MoveAction = PlayerControls.actions["Move"];
         JumpAction = PlayerControls.actions["Jump"];
+        RunAction = PlayerControls.actions["Run"];
 
         
     }
@@ -121,9 +123,16 @@ public class PlayerController : MonoBehaviour
         playerRb.AddForce(Vector2.right * horizontal * moveSpeed);
 
         // If moving faster than maxSpeed, set speed to maxSpeed
-        if (Mathf.Abs(playerRb.linearVelocity.x) > maxSpeed) {
-            playerRb.linearVelocity = new Vector2(Mathf.Sign(playerRb.linearVelocity.x) * maxSpeed, playerRb.linearVelocity.y);
+        if (Mathf.Abs(playerRb.linearVelocity.x) > SpeedLevel()) {
+            playerRb.linearVelocity = new Vector2(Mathf.Sign(playerRb.linearVelocity.x) * SpeedLevel(), playerRb.linearVelocity.y);
         }
+    }
+    float SpeedLevel()
+    {
+        if (RunAction.ReadValue<float>() == 1)
+        {
+            return runSpeed;
+        } else return walkSpeed;
     }
 
     void ModifyPhysics()

@@ -13068,7 +13068,8 @@ MonoBehaviour:
   linearDrag: 4
   gravity: 1
   fallMultiplier: 5
-  maxSpeed: 7
+  runSpeed: 9
+  walkSpeed: 5
   onGround: 0
   groundLength: 1
   GroundLayer:
