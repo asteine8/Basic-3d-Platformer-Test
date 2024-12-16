@@ -133,6 +133,17 @@
                 },
                 {
                     "name": "",
+                    "id": "bd842a1a-aa76-4d9d-b520-fdd10f2f2ccd",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "4dc412eb-f4db-44d5-a1ba-50badea17981",
                     "path": "<Keyboard>/shift",
                     "interactions": "",
@@ -168,6 +179,17 @@
                     "name": "",
                     "id": "a2967cac-ee4e-47f9-9d27-3dae8a80d3d6",
                     "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b52090d2-3ba3-4331-8b37-825eafa84e89",
+                    "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
