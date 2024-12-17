@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
@@ -17,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Components")]
     public Rigidbody2D playerRb;
+    public BoxCollider2D playerBoxColl;
     
 
     [Header("Physics")]
@@ -32,10 +35,25 @@ public class PlayerController : MonoBehaviour
 
     [Header("Collision")]
     public bool onGround;
+    public bool underRoof;
     public float groundLength = 1;
+    public float roofLength = 1;
     public LayerMask GroundLayer;
     [Tooltip("How far apart to space the two colliders from the center X position")]
     public Vector3 colliderOffset;
+
+    [Header("Crouch Settings")]
+    public Vector2 StandingColliderSize;
+    public Vector2 StandingColliderOffset;
+    public Vector2 CrouchingColliderSize;
+    public Vector2 CrouchingColliderOffset;
+    public bool crouched;
+
+    [Header("Slide Settings")]
+    public bool canSlide;
+    public bool isSliding;
+    public float slideDuration = 2;
+    public float slideDrag = 0.2f;
 
     // Input Actions
     private PlayerInput PlayerControls;
@@ -48,12 +66,20 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         PlayerControls = GetComponent<PlayerInput>();
+        playerBoxColl = GetComponent<BoxCollider2D>();
 
+
+        // Get initial collider size and offset
+        StandingColliderSize = playerBoxColl.size;
+        StandingColliderOffset = playerBoxColl.offset;
+
+        // Assign input actions
         MoveAction = PlayerControls.actions["Move"];
         JumpAction = PlayerControls.actions["Jump"];
         RunAction = PlayerControls.actions["Run"];
+        CrouchAction = PlayerControls.actions["Crouch"];
 
-        
+
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -61,7 +87,19 @@ public class PlayerController : MonoBehaviour
     {
         playerRb = GetComponent<Rigidbody2D>();
 
+        // Attach Events
+        JumpAction.started += onJumpPressed;
+
         onGround = false;
+        crouched = false;
+        canSlide = false;
+        isSliding = false;
+    }
+
+    private void OnDestroy()
+    {
+        // Detach Events
+        JumpAction.started -= onJumpPressed;
     }
 
     // Update is called once per frame
@@ -73,7 +111,9 @@ public class PlayerController : MonoBehaviour
         onGround = Physics2D.Raycast(transform.position + colliderOffset, Vector2.down, groundLength, GroundLayer)
                         || Physics2D.Raycast(transform.position - colliderOffset, Vector2.down, groundLength, GroundLayer);
 
-        
+        // Raycast to detect a roof
+        underRoof = Physics2D.Raycast(transform.position + colliderOffset, Vector2.up, roofLength)
+                        || Physics2D.Raycast(transform.position - colliderOffset, Vector2.up, roofLength);
 
         // If Jumpbutton is pressed
         if (JumpAction.ReadValue<float>() == 1)
@@ -93,33 +133,100 @@ public class PlayerController : MonoBehaviour
 
         MoveCharacter(direction.x);
 
+        // handle crouch
+        Crouch();
+
         ModifyPhysics();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log(collision.gameObject.name);
+        //Debug.Log(collision.gameObject.name);
         //if (collision.gameObject.CompareTag("Ground")) onGround = true;
     }
 
+    // Draw Gizmos
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
+
+        // Show ground detection raycasts
         Gizmos.DrawLine(transform.position + colliderOffset, transform.position + (Vector3.down* groundLength) + colliderOffset);
         Gizmos.DrawLine(transform.position - colliderOffset, transform.position + (Vector3.down * groundLength) - colliderOffset);
 
+        // Show Roof detection raycasts
+        Gizmos.DrawLine(transform.position + colliderOffset, transform.position + (Vector3.up * roofLength) + colliderOffset);
+        Gizmos.DrawLine(transform.position - colliderOffset, transform.position + (Vector3.up * roofLength) - colliderOffset);
+
+        Gizmos.DrawWireCube(GetComponent<BoxCollider2D>().transform.position, GetComponent<BoxCollider2D>().bounds.size);
     }
 
     #region Helper Funtions
+
+    void Crouch()
+    {
+        // if crouching
+        Slide();
+        if (CrouchAction.ReadValue<float>() == 1 && onGround)
+        {
+            if (canSlide == true)
+            {
+                playerBoxColl.size = CrouchingColliderSize;
+                playerBoxColl.offset = CrouchingColliderOffset;
+                StartCoroutine(sliding());
+            }
+            // Modify box collider
+            playerBoxColl.size = CrouchingColliderSize;
+            playerBoxColl.offset = CrouchingColliderOffset;
+            crouched = true;
+
+
+        }
+        else if ((CrouchAction.ReadValue<float>() == 0 || !onGround) && !underRoof)
+        {
+            // Modify box collider
+            playerBoxColl.size = StandingColliderSize;
+            playerBoxColl.offset = StandingColliderOffset;
+
+            crouched = false;
+        }
+    }
+
+
+
+    void Slide()
+    {
+        if (SpeedLevel() == runSpeed)
+        {
+            canSlide = true;
+        } else
+        {
+            canSlide = false;
+        }
+    }
+    IEnumerator sliding()
+    {
+        isSliding = true;
+        playerRb.linearDamping = slideDrag;
+        yield return new WaitForSeconds(slideDuration);
+        isSliding = false;
+
+    }
+
     // Do a jump!   
     void Jump()
     {
         playerRb.linearVelocity = new Vector2(playerRb.linearVelocity.x, 0);
         playerRb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        isSliding = false;
     }
+
+    
 
     void MoveCharacter(float horizontal)
     {
+        if (isSliding) return;
+
         playerRb.AddForce(Vector2.right * horizontal * moveSpeed);
 
         // If moving faster than maxSpeed, set speed to maxSpeed
@@ -129,7 +236,7 @@ public class PlayerController : MonoBehaviour
     }
     float SpeedLevel()
     {
-        if (RunAction.ReadValue<float>() == 1)
+        if (RunAction.ReadValue<float>() == 1 && !crouched)
         {
             return runSpeed;
         } else return walkSpeed;
@@ -141,7 +248,7 @@ public class PlayerController : MonoBehaviour
                                     || (direction.x < 0 && playerRb.linearVelocity.x > 0);
 
         // Physics when on the ground (left/right movement)
-        if (onGround)
+        if (onGround && !isSliding)
         {
             if (Mathf.Abs(direction.x) < 0.4f || changingDirections)
             {
@@ -155,7 +262,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Physics when in the air (jumping)
-        else
+        else if (!isSliding)
         {
             playerRb.gravityScale = gravity;
             playerRb.linearDamping = linearDrag * 0.15f;
@@ -178,4 +285,15 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    #region Event Functions
+
+    // Called when JumpAction.start
+    void onJumpPressed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Jump Started");
+    }
+
+    #endregion
+
 }
