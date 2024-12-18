@@ -13081,8 +13081,11 @@ MonoBehaviour:
   GroundLayer:
     serializedVersion: 2
     m_Bits: 8
+  WallLayer:
+    serializedVersion: 2
+    m_Bits: 64
   colliderOffset: {x: 0.24, y: 0, z: 0}
-  wallColliderOffset: {x: 0, y: 0.57, z: 0}
+  wallColliderOffset: {x: 0, y: 0.67, z: 0}
   StandingColliderSize: {x: 0, y: 0}
   StandingColliderOffset: {x: 0, y: 0}
   CrouchingColliderSize: {x: 0.75, y: 1.006686}
@@ -13092,7 +13095,15 @@ MonoBehaviour:
   isSliding: 0
   slideDuration: 1
   slideDrag: 0.65
+  isGliding: 0
+  GlideGravity: 0.1
+  GlideMovementModifier: 0.25
   canLatch: 0
+  isLatched: 0
+  climbSpeed: 2
+  wallSlideSpeed: 0.5
+  wallDirection: {x: 0, y: 0, z: 0}
+  maxWallSlideSpeed: 3.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

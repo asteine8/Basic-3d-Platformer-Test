@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
     public float roofLength = 1;
     public float wallLength = 0.425f;
     public LayerMask GroundLayer;
+    public LayerMask WallLayer;
     [Tooltip("How far apart to space the two colliders from the center X position")]
     public Vector3 colliderOffset;
     public Vector3 wallColliderOffset;
@@ -82,6 +83,11 @@ public class PlayerController : MonoBehaviour
     public bool isLatched;
     public float climbSpeed;
     public float wallSlideSpeed;
+    public RaycastHit2D hitObject;
+    public Vector3 wallDirection;
+    public float maxWallSlideSpeed = 7;
+    public bool tooHighOnWall;
+    public bool tooLowOnWall;
 
 
     // Called when the script is loaded before Start()
@@ -121,6 +127,8 @@ public class PlayerController : MonoBehaviour
         canSlide = false;
         isSliding = false;
         canLatch = false;
+        tooHighOnWall = false;
+        tooLowOnWall = false;
     }
 
     private void OnDestroy()
@@ -141,30 +149,31 @@ public class PlayerController : MonoBehaviour
         underRoof = Physics2D.Raycast(transform.position + colliderOffset, Vector2.up, roofLength)
                         || Physics2D.Raycast(transform.position - colliderOffset, Vector2.up, roofLength);
 
-        // detect if either on left or right wall
-        onRightWall = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.right, wallLength)
-                        || Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.right, wallLength);
-
-        onLeftWall = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.left, wallLength)
-                        || Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.left, wallLength);
 
 
-        DetectWallClimb();
+        DetectWall();
         // If Jumpbutton is pressed
         if (JumpAction.WasPressedThisFrame())
         {
-            if (canLatch)
+            if (isLatched)
+            {
+                Jump();
+                isLatched = false;
+            }
+
+            else if (canLatch)
             {
                 isLatched = true;
-                LatchedToWall();
+                LatchToWall();
             } else if (!canLatch)
             {
                 jumpTimer = Time.time + jumpDelay;
             }
             // Check if we are going to glide
-            else if (!onGround)
+            if (!onGround && !isLatched)
             {
                 isGliding = true;
+                
             }
         }
 
@@ -190,13 +199,13 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
-
+        ModifyPhysics();
         MoveCharacter(direction);
 
         // handle crouch
         Crouch();
 
-        ModifyPhysics();
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -239,22 +248,61 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void DetectWallClimb()
+    void DetectWall()
     {
-        if (onLeftWall || onRightWall)
-        {
-            canLatch = true;
-        }
+        
+
+        // detect if either on left or right wall
+        RaycastHit2D h1 = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.right, wallLength, WallLayer);
+        RaycastHit2D h2 = Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.right, wallLength, WallLayer);
+        RaycastHit2D h3 = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.left, wallLength, WallLayer);
+        RaycastHit2D h4 = Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.left, wallLength, WallLayer);
+
+        // did we hit something?
+        if (h1) { hitObject = h1; wallDirection = Vector2.right; }
+        else if (h2) { hitObject = h2; wallDirection = Vector2.right; }
+        else if (h3) { hitObject = h3; wallDirection = Vector2.left; }
+        else if (h4) { hitObject = h4; wallDirection = Vector2.left; }
         else
         {
+            isLatched = false;
             canLatch = false;
+            return; // We didn't hit anything
         }
+
+        // If we hit smth, say we can latch
+        canLatch = true;
+
+        // Detect too high / too low on the right side
+        if (wallDirection.Equals(Vector2.right))
+        {
+            tooHighOnWall = !h1;
+            tooLowOnWall = !h2;
+        }
+
+        // Detect too high / too low on the left side
+        else if (wallDirection.Equals(Vector2.left))
+        {
+            tooHighOnWall = !h3;
+            tooLowOnWall = !h4;
+        }
+
     }
     
-    void LatchedToWall()
+    void LatchToWall()
     {
+        DetectWall();
+
         playerRb.linearVelocityX = 0;
         playerRb.gravityScale = 0;
+
+        // Calculate distance to the wall
+        float distanceFromWall = Mathf.Abs(hitObject.distance - playerBoxColl.bounds.size.x/2);
+        Debug.Log(distanceFromWall);
+
+        // Snap to the wall
+        transform.position = transform.position + distanceFromWall * wallDirection;
+        Debug.Log(distanceFromWall * wallDirection);
     }
 
     void Crouch()
@@ -328,7 +376,30 @@ public class PlayerController : MonoBehaviour
     {
         if (isLatched)
         {   
-            playerRb.linearVelocityY = input.y * (input.y > 0 ? climbSpeed : wallSlideSpeed);  
+            if (tooHighOnWall || tooLowOnWall)
+            {
+                playerRb.linearVelocityY = 0;
+                playerRb.gravityScale = 0;
+            }
+
+            // climb
+            if (input.y >= 0 && !tooHighOnWall)
+            {
+                playerRb.linearVelocityY = input.y * climbSpeed;
+                
+            }
+
+            // slide
+            else if (!tooLowOnWall)
+            {
+                playerRb.gravityScale = wallSlideSpeed;
+
+                // Adjust speed to max wall slide speed
+                if (Mathf.Abs(playerRb.linearVelocity.magnitude) > maxWallSlideSpeed)
+                {
+                    playerRb.linearVelocity = maxWallSlideSpeed * playerRb.linearVelocity / playerRb.linearVelocity.magnitude;
+                }
+            }
             
         }
         else
