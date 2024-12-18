@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -62,11 +63,19 @@ public class PlayerController : MonoBehaviour
     private InputAction RunAction;
     private InputAction CrouchAction;
 
+    [Header("Game State")]
+    private Vector3 originPos;
+    private bool playerFell;
+
     // Called when the script is loaded before Start()
     private void Awake()
     {
         PlayerControls = GetComponent<PlayerInput>();
         playerBoxColl = GetComponent<BoxCollider2D>();
+
+        // identify player state
+        originPos = transform.position;
+        playerFell = false;
 
 
         // Get initial collider size and offset
@@ -105,7 +114,6 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
 
         // Raycast to detect ground
         onGround = Physics2D.Raycast(transform.position + colliderOffset, Vector2.down, groundLength, GroundLayer)
@@ -125,6 +133,13 @@ public class PlayerController : MonoBehaviour
         }
 
         direction = MoveAction.ReadValue<Vector2>();
+
+        // check if player fell
+        if (transform.position.y < -30)
+        {
+            playerFell = true;
+            ResetPosition();
+        }
     }
 
     private void FixedUpdate()
@@ -165,6 +180,15 @@ public class PlayerController : MonoBehaviour
     }
 
     #region Helper Funtions
+
+    void ResetPosition()
+    {
+        if (playerFell == true)
+        {
+            transform.position = originPos;
+            playerFell = false;
+        }
+    }
 
     void Crouch()
     {
