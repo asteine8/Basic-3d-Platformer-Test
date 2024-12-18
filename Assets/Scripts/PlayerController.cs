@@ -37,11 +37,15 @@ public class PlayerController : MonoBehaviour
     [Header("Collision")]
     public bool onGround;
     public bool underRoof;
+    public bool onRightWall;
+    public bool onLeftWall;
     public float groundLength = 1;
     public float roofLength = 1;
+    public float wallLength = 0.425f;
     public LayerMask GroundLayer;
     [Tooltip("How far apart to space the two colliders from the center X position")]
     public Vector3 colliderOffset;
+    public Vector3 wallColliderOffset;
 
     [Header("Crouch Settings")]
     public Vector2 StandingColliderSize;
@@ -73,6 +77,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 originPos;
     private bool playerFell;
 
+    [Header("Wall Climb")]
+    public bool canLatch;
 
     // Called when the script is loaded before Start()
     private void Awake()
@@ -130,8 +136,14 @@ public class PlayerController : MonoBehaviour
         underRoof = Physics2D.Raycast(transform.position + colliderOffset, Vector2.up, roofLength)
                         || Physics2D.Raycast(transform.position - colliderOffset, Vector2.up, roofLength);
 
+        // detect if either on left or right wall
+        onRightWall = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.right, wallLength)
+                        || Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.right, wallLength);
 
-       
+        onLeftWall = Physics2D.Raycast(transform.position + wallColliderOffset, Vector2.left, wallLength)
+                        || Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.left, wallLength);
+
+
 
         // If Jumpbutton is pressed
         if (JumpAction.WasPressedThisFrame())
@@ -194,6 +206,13 @@ public class PlayerController : MonoBehaviour
         // Show Roof detection raycasts
         Gizmos.DrawLine(transform.position + colliderOffset, transform.position + (Vector3.up * roofLength) + colliderOffset);
         Gizmos.DrawLine(transform.position - colliderOffset, transform.position + (Vector3.up * roofLength) - colliderOffset);
+
+        // Show Wall detection raycasts
+        Gizmos.DrawLine(transform.position + wallColliderOffset, transform.position + (Vector3.right * wallLength) + wallColliderOffset);
+        Gizmos.DrawLine(transform.position - wallColliderOffset, transform.position + (Vector3.right * wallLength) - wallColliderOffset);
+
+        Gizmos.DrawLine(transform.position + wallColliderOffset, transform.position + (Vector3.left * wallLength) + wallColliderOffset);
+        Gizmos.DrawLine(transform.position - wallColliderOffset, transform.position + (Vector3.left * wallLength) - wallColliderOffset);
 
         Gizmos.DrawWireCube(GetComponent<BoxCollider2D>().transform.position, GetComponent<BoxCollider2D>().bounds.size);
     }
