@@ -206,10 +206,17 @@ public class PlayerController : MonoBehaviour
     }
     IEnumerator sliding()
     {
-        isSliding = true;
-        playerRb.linearDamping = slideDrag;
-        yield return new WaitForSeconds(slideDuration);
+        while (Mathf.Abs(playerRb.linearVelocityX) > walkSpeed)
+        {
+            isSliding = true;
+            playerRb.linearDamping = slideDrag;
+            yield return null;
+        }
         isSliding = false;
+        //isSliding = true;
+        //playerRb.linearDamping = slideDrag;
+        //yield return new WaitForSeconds(slideDuration);
+        //isSliding = false;
 
     }
 

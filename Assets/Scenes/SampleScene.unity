@@ -13087,7 +13087,7 @@ MonoBehaviour:
   canSlide: 0
   isSliding: 0
   slideDuration: 1
-  slideDrag: 0.4
+  slideDrag: 0.65
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
