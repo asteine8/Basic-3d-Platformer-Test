@@ -177,6 +177,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (CrouchAction.WasPressedThisFrame() && isLatched)
+        {
+            isLatched = false;
+        }
+
         // If jump button is released
         if (JumpAction.WasReleasedThisFrame())
         {
