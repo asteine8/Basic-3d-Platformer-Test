@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Glide Settings")]
     public bool isGliding;
-    public float GlideGravity = 0.1f;
+    public float GlideFallVelocity = 0.25f;
     [Tooltip("Scales left/right movement by this much when gliding")]
     public float GlideMovementModifier = 0.25f;
 
@@ -469,7 +469,9 @@ public class PlayerController : MonoBehaviour
                 // Gliding fall
                 if (isGliding)
                 {
-                    playerRb.gravityScale = GlideGravity;
+
+                    playerRb.linearVelocityY = GlideFallVelocity;
+                    playerRb.gravityScale = 0;
                 }
 
                 // Normal fall

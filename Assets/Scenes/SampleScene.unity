@@ -13096,7 +13096,7 @@ MonoBehaviour:
   slideDuration: 1
   slideDrag: 0.65
   isGliding: 0
-  GlideGravity: 0.1
+  GlideFallVelocity: -1
   GlideMovementModifier: 0.25
   canLatch: 0
   isLatched: 0
@@ -13104,6 +13104,8 @@ MonoBehaviour:
   wallSlideSpeed: 0.5
   wallDirection: {x: 0, y: 0, z: 0}
   maxWallSlideSpeed: 3.5
+  tooHighOnWall: 0
+  tooLowOnWall: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
