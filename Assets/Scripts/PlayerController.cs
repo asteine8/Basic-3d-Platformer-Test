@@ -56,6 +56,12 @@ public class PlayerController : MonoBehaviour
     public float slideDuration = 2;
     public float slideDrag = 0.2f;
 
+    [Header("Glide Settings")]
+    public bool isGliding;
+    public float GlideGravity = 0.1f;
+    [Tooltip("Scales left/right movement by this much when gliding")]
+    public float GlideMovementModifier = 0.25f;
+
     // Input Actions
     private PlayerInput PlayerControls;
     private InputAction MoveAction;
@@ -66,6 +72,7 @@ public class PlayerController : MonoBehaviour
     [Header("Game State")]
     private Vector3 originPos;
     private bool playerFell;
+
 
     // Called when the script is loaded before Start()
     private void Awake()
@@ -130,6 +137,18 @@ public class PlayerController : MonoBehaviour
         if (JumpAction.WasPressedThisFrame())
         {
             jumpTimer = Time.time + jumpDelay;
+
+            // Check if we are going to glide
+            if (!onGround)
+            {
+                isGliding = true;
+            }
+        }
+
+        // If jump button is released
+        if (JumpAction.WasReleasedThisFrame())
+        {
+            isGliding = false;
         }
 
         direction = MoveAction.ReadValue<Vector2>();
@@ -261,7 +280,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isSliding) return;
 
-        playerRb.AddForce(Vector2.right * horizontal * moveSpeed);
+        playerRb.AddForce(Vector2.right * horizontal * (isGliding ? (GlideMovementModifier*moveSpeed) : moveSpeed));
 
         // If moving faster than maxSpeed, set speed to maxSpeed
         if (Mathf.Abs(playerRb.linearVelocity.x) > SpeedLevel()) {
@@ -280,6 +299,8 @@ public class PlayerController : MonoBehaviour
     {
         bool changingDirections = (direction.x > 0 && playerRb.linearVelocity.x < 0)
                                     || (direction.x < 0 && playerRb.linearVelocity.x > 0);
+
+        if (changingDirections) isGliding = false; // Don't allow gliding when changing directions
 
         // Physics when on the ground (left/right movement)
         if (onGround && !isSliding)
@@ -306,7 +327,18 @@ public class PlayerController : MonoBehaviour
             // Falling
             if (playerRb.linearVelocity.y <= 0)
             {
-                playerRb.gravityScale = gravity * fallMultiplier;
+                // Gliding fall
+                if (isGliding)
+                {
+                    playerRb.gravityScale = GlideGravity;
+                }
+
+                // Normal fall
+                else
+                {
+                    playerRb.gravityScale = gravity * fallMultiplier;
+                }
+                
                 //Debug.Log("Falling");
             } 
 
