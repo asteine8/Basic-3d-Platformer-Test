@@ -115,8 +115,11 @@ public class PlayerController : MonoBehaviour
         underRoof = Physics2D.Raycast(transform.position + colliderOffset, Vector2.up, roofLength)
                         || Physics2D.Raycast(transform.position - colliderOffset, Vector2.up, roofLength);
 
+
+       
+
         // If Jumpbutton is pressed
-        if (JumpAction.ReadValue<float>() == 1)
+        if (JumpAction.WasPressedThisFrame())
         {
             jumpTimer = Time.time + jumpDelay;
         }
