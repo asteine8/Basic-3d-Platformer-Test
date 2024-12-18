@@ -79,6 +79,10 @@ public class PlayerController : MonoBehaviour
 
     [Header("Wall Climb")]
     public bool canLatch;
+    public bool isLatched;
+    public float climbSpeed;
+    public float wallSlideSpeed;
+
 
     // Called when the script is loaded before Start()
     private void Awake()
@@ -116,6 +120,7 @@ public class PlayerController : MonoBehaviour
         crouched = false;
         canSlide = false;
         isSliding = false;
+        canLatch = false;
     }
 
     private void OnDestroy()
@@ -144,14 +149,20 @@ public class PlayerController : MonoBehaviour
                         || Physics2D.Raycast(transform.position - wallColliderOffset, Vector2.left, wallLength);
 
 
-
+        DetectWallClimb();
         // If Jumpbutton is pressed
         if (JumpAction.WasPressedThisFrame())
         {
-            jumpTimer = Time.time + jumpDelay;
-
+            if (canLatch)
+            {
+                isLatched = true;
+                LatchedToWall();
+            } else if (!canLatch)
+            {
+                jumpTimer = Time.time + jumpDelay;
+            }
             // Check if we are going to glide
-            if (!onGround)
+            else if (!onGround)
             {
                 isGliding = true;
             }
@@ -180,7 +191,7 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
 
-        MoveCharacter(direction.x);
+        MoveCharacter(direction);
 
         // handle crouch
         Crouch();
@@ -226,6 +237,24 @@ public class PlayerController : MonoBehaviour
             transform.position = originPos;
             playerFell = false;
         }
+    }
+
+    void DetectWallClimb()
+    {
+        if (onLeftWall || onRightWall)
+        {
+            canLatch = true;
+        }
+        else
+        {
+            canLatch = false;
+        }
+    }
+    
+    void LatchedToWall()
+    {
+        playerRb.linearVelocityX = 0;
+        playerRb.gravityScale = 0;
     }
 
     void Crouch()
@@ -294,16 +323,26 @@ public class PlayerController : MonoBehaviour
     }
 
     
-
-    void MoveCharacter(float horizontal)
+ 
+    void MoveCharacter(Vector2 input)
     {
-        if (isSliding) return;
+        if (isLatched)
+        {   
+            playerRb.linearVelocityY = input.y * (input.y > 0 ? climbSpeed : wallSlideSpeed);  
+            
+        }
+        else
+        {
 
-        playerRb.AddForce(Vector2.right * horizontal * (isGliding ? (GlideMovementModifier*moveSpeed) : moveSpeed));
+            if (isSliding) return;
 
-        // If moving faster than maxSpeed, set speed to maxSpeed
-        if (Mathf.Abs(playerRb.linearVelocity.x) > SpeedLevel()) {
-            playerRb.linearVelocity = new Vector2(Mathf.Sign(playerRb.linearVelocity.x) * SpeedLevel(), playerRb.linearVelocity.y);
+            playerRb.AddForce(Vector2.right * input.x * (isGliding ? (GlideMovementModifier * moveSpeed) : moveSpeed));
+
+            // If moving faster than maxSpeed, set speed to maxSpeed
+            if (Mathf.Abs(playerRb.linearVelocity.x) > SpeedLevel())
+            {
+                playerRb.linearVelocity = new Vector2(Mathf.Sign(playerRb.linearVelocity.x) * SpeedLevel(), playerRb.linearVelocity.y);
+            }
         }
     }
     float SpeedLevel()
@@ -319,8 +358,13 @@ public class PlayerController : MonoBehaviour
         bool changingDirections = (direction.x > 0 && playerRb.linearVelocity.x < 0)
                                     || (direction.x < 0 && playerRb.linearVelocity.x > 0);
 
-        if (changingDirections) isGliding = false; // Don't allow gliding when changing directions
-
+        if (isLatched)
+        {
+            playerRb.linearVelocityX = 0;
+            playerRb.gravityScale = 0;
+            playerRb.linearDamping = 0;
+            return;
+        }
         // Physics when on the ground (left/right movement)
         if (onGround && !isSliding)
         {
