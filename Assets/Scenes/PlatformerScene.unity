@@ -12870,7 +12870,7 @@ GameObject:
   - component: {fileID: 2089977446}
   - component: {fileID: 2089977445}
   m_Layer: 0
-  m_Name: Player
+  m_Name: PlatformPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
