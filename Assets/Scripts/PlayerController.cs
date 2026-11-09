@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
     [Header("Components")]
     public Rigidbody2D playerRb;
     public BoxCollider2D playerBoxColl;
+    public SpriteRenderer playerSpriteRenderer;
+    public Animator playerAnimator;
     
 
     [Header("Physics")]
@@ -433,6 +435,15 @@ public class PlayerController : MonoBehaviour
     {
         bool changingDirections = (direction.x > 0 && playerRb.linearVelocity.x < 0)
                                     || (direction.x < 0 && playerRb.linearVelocity.x > 0);
+        if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0) 
+            playerAnimator.SetBool("isRunning", true);
+        else if (((playerRb.linearVelocity.x < -0.25)
+                                    || (playerRb.linearVelocity.x > 0.25)) && (MoveAction.ReadValue<Vector2>().x == 0))
+        playerAnimator.SetBool("isRunning", false);
+        if (playerRb.linearVelocity.x > 0)
+            playerSpriteRenderer.flipX = false;
+        else if (playerRb.linearVelocity.x < 0)
+        playerSpriteRenderer.flipX = true;
 
         if (isLatched)
         {
