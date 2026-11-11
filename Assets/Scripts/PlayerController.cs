@@ -207,12 +207,29 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
         ModifyPhysics();
+        UpdateAnimation();
         MoveCharacter(direction);
 
         // handle crouch
         Crouch();
 
         
+    }
+
+    private void UpdateAnimation()
+    {
+        if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0)
+            playerAnimator.SetBool("isRunning", true);
+        else if (((playerRb.linearVelocity.x < -0.25)
+                                    || (playerRb.linearVelocity.x > 0.25)) && (MoveAction.ReadValue<Vector2>().x == 0))
+            playerAnimator.SetBool("isRunning", false);
+
+
+        // Get 
+        if (playerRb.linearVelocity.x > 0)
+            playerSpriteRenderer.flipX = false;
+        else if (playerRb.linearVelocity.x < 0)
+            playerSpriteRenderer.flipX = true;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -435,15 +452,6 @@ public class PlayerController : MonoBehaviour
     {
         bool changingDirections = (direction.x > 0 && playerRb.linearVelocity.x < 0)
                                     || (direction.x < 0 && playerRb.linearVelocity.x > 0);
-        if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0) 
-            playerAnimator.SetBool("isRunning", true);
-        else if (((playerRb.linearVelocity.x < -0.25)
-                                    || (playerRb.linearVelocity.x > 0.25)) && (MoveAction.ReadValue<Vector2>().x == 0))
-        playerAnimator.SetBool("isRunning", false);
-        if (playerRb.linearVelocity.x > 0)
-            playerSpriteRenderer.flipX = false;
-        else if (playerRb.linearVelocity.x < 0)
-        playerSpriteRenderer.flipX = true;
 
         if (isLatched)
         {
