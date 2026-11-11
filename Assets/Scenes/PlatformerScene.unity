@@ -13063,7 +13063,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 15
-  jumpForce: 11
+  jumpForce: 22
   jumpDelay: 0.1
   playerRb: {fileID: 2089977441}
   playerBoxColl: {fileID: 0}
