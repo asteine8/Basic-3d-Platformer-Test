@@ -241,7 +241,7 @@ public class PlayerController : MonoBehaviour
 
 
         // Checks for Jumping Up
-        if (playerRb.linearVelocity.y > 0 && (JumpAction.ReadValue<float>() == 1 || !onGround))
+        if (!onGround && (playerRb.linearVelocity.y > 0 && (JumpAction.ReadValue<float>() == 1)))
         {
             playerAnimator.SetBool("isJumping", true);
             isRunning = false;
@@ -255,7 +255,7 @@ public class PlayerController : MonoBehaviour
 
         // Checks for Falling
         playerAnimator.SetBool("isFalling", 
-            !onGround && playerRb.linearVelocity.y <= 0);
+            !onGround && playerRb.linearVelocity.y <= -0.2);
         //Debug.Log("isFalling" + playerAnimator.GetBool("isFalling").ToString());
 
         // Check for Gliding

@@ -12948,7 +12948,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.13, y: 3.35}
+  m_Size: {x: 2.13, y: 3.5}
   m_EdgeRadius: 0
 --- !u!212 &2089977443
 SpriteRenderer:
@@ -13087,8 +13087,8 @@ MonoBehaviour:
   WallLayer:
     serializedVersion: 2
     m_Bits: 64
-  colliderOffset: {x: 0.79, y: 0, z: 0}
-  wallColliderOffset: {x: 0, y: 1.24, z: 0}
+  colliderOffset: {x: 0.83, y: 0, z: 0}
+  wallColliderOffset: {x: 0, y: 1.2, z: 0}
   StandingColliderSize: {x: 0, y: 0}
   StandingColliderOffset: {x: 0, y: 0}
   CrouchingColliderSize: {x: 0.75, y: 1.006686}
