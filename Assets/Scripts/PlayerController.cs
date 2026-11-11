@@ -94,7 +94,7 @@ public class PlayerController : MonoBehaviour
 
     private double timeSinceStoppedRunning;
     private bool waitingForIdle;
-    public double timeToStartIdling = 0.5;
+    public double timeToStartIdling = 0.25;
     private bool isRunning;
 
 
@@ -241,19 +241,27 @@ public class PlayerController : MonoBehaviour
 
 
         // Checks for Jumping Up
-        playerAnimator.SetBool("isJumping", 
-            playerRb.linearVelocity.y > 0 && (JumpAction.ReadValue<float>() == 1 || !onGround));
-        Debug.Log("isJumping" + playerAnimator.GetBool("isJumping").ToString());
+        if (playerRb.linearVelocity.y > 0 && (JumpAction.ReadValue<float>() == 1 || !onGround))
+        {
+            playerAnimator.SetBool("isJumping", true);
+            isRunning = false;
+        } else
+        {
+            playerAnimator.SetBool("isJumping", false);
+        }
+            
+        
+        //Debug.Log("isJumping" + playerAnimator.GetBool("isJumping").ToString());
 
         // Checks for Falling
         playerAnimator.SetBool("isFalling", 
             !onGround && playerRb.linearVelocity.y <= 0);
-        Debug.Log("isFalling" + playerAnimator.GetBool("isFalling").ToString());
+        //Debug.Log("isFalling" + playerAnimator.GetBool("isFalling").ToString());
 
         // Check for Gliding
         playerAnimator.SetBool("isGliding",
             isGliding);
-        Debug.Log("isGliding" + isGliding.ToString());
+        //Debug.Log("isGliding" + isGliding.ToString());
 
         // Check for Running
 
@@ -262,11 +270,11 @@ public class PlayerController : MonoBehaviour
             isRunning = true;
             waitingForIdle = false;
         }
-        else if (playerRb.linearVelocity.x < 0 || playerRb.linearVelocity.x > 0)
-        {
-            isRunning = true;
-            waitingForIdle = false;
-        }
+        //else if (playerRb.linearVelocity.x < -1 || playerRb.linearVelocity.x > 1)
+        //{
+        //    isRunning = true;
+        //    waitingForIdle = false;
+        //}
         else
         {
             // Wait for timeToStartIdling to stop running animation
@@ -283,14 +291,16 @@ public class PlayerController : MonoBehaviour
             }
             
         }
+        //Debug.Log("WaitingForIdle: " + waitingForIdle.ToString());
+
 
         // Update isRunning
         playerAnimator.SetBool("isRunning", isRunning);
-        Debug.Log("IsRunning" + isRunning.ToString());
+        //Debug.Log("IsRunning" + isRunning.ToString());
 
         // Update onGround in animator
         playerAnimator.SetBool("onGround", onGround);
-        Debug.Log("onGround" + onGround.ToString());
+        //Debug.Log("onGround" + onGround.ToString());
 
         // Get 
         if (playerRb.linearVelocity.x > 0)
