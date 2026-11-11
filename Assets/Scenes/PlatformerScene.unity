@@ -783,7 +783,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.550001, y: -2.6299999, z: -10}
+  m_LocalPosition: {x: -14.550001, y: -2.12, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12803,7 +12803,7 @@ Transform:
   m_GameObject: {fileID: 1278969050}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.550001, y: -2.6299999, z: -10}
+  m_LocalPosition: {x: -14.550001, y: -2.12, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12942,13 +12942,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.6333334, y: 3.55}
-    newSize: {x: 1, y: 2.22}
+    oldSize: {x: 7.032258, y: 6.870968}
+    newSize: {x: 7.032258, y: 6.870968}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.75, y: 2.1068282}
+  m_Size: {x: 1.6, y: 3.8}
   m_EdgeRadius: 0
 --- !u!212 &2089977443
 SpriteRenderer:
@@ -12994,12 +12994,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 1a43269d419132b4f888c03997a2f092, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d55d7bfeca545434583e1ea207c27c1b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 2.22}
+  m_Size: {x: 7.032258, y: 6.870968}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -13014,7 +13014,7 @@ Transform:
   m_GameObject: {fileID: 2089977440}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.55, y: -3.06, z: 0}
+  m_LocalPosition: {x: -14.55, y: -2.55, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -13109,6 +13109,7 @@ MonoBehaviour:
   maxWallSlideSpeed: 3.5
   tooHighOnWall: 0
   tooLowOnWall: 0
+  timeToStartIdling: 0.5
 --- !u!95 &2089977447
 Animator:
   serializedVersion: 7
