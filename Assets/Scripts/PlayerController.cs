@@ -92,6 +92,12 @@ public class PlayerController : MonoBehaviour
     public bool tooLowOnWall;
 
 
+    private double timeSinceStoppedRunning;
+    private bool waitingForIdle;
+    public double timeToStartIdling = 0.5;
+    private bool isRunning;
+
+
     // Called when the script is loaded before Start()
     private void Awake()
     {
@@ -131,6 +137,12 @@ public class PlayerController : MonoBehaviour
         canLatch = false;
         tooHighOnWall = false;
         tooLowOnWall = false;
+        isGliding = false;
+        isRunning = false;
+
+        // Waiting for Idle Debounce
+        timeSinceStoppedRunning = Time.timeAsDouble;
+        waitingForIdle = false;
     }
 
     private void OnDestroy()
@@ -218,12 +230,67 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0)
-            playerAnimator.SetBool("isRunning", true);
-        else if (((playerRb.linearVelocity.x < -0.25)
-                                    || (playerRb.linearVelocity.x > 0.25)) && (MoveAction.ReadValue<Vector2>().x == 0))
-            playerAnimator.SetBool("isRunning", false);
+        //if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0)
+        //    playerAnimator.SetBool("isRunning", true);
+        //else if (((playerRb.linearVelocity.x < -0.25)
+        //                            || (playerRb.linearVelocity.x > 0.25)) && (MoveAction.ReadValue<Vector2>().x == 0))
+        //    playerAnimator.SetBool("isRunning", false);
 
+        
+
+
+
+        // Checks for Jumping Up
+        playerAnimator.SetBool("isJumping", 
+            playerRb.linearVelocity.y > 0 && (JumpAction.ReadValue<float>() == 1 || !onGround));
+        Debug.Log("isJumping" + playerAnimator.GetBool("isJumping").ToString());
+
+        // Checks for Falling
+        playerAnimator.SetBool("isFalling", 
+            !onGround && playerRb.linearVelocity.y <= 0);
+        Debug.Log("isFalling" + playerAnimator.GetBool("isFalling").ToString());
+
+        // Check for Gliding
+        playerAnimator.SetBool("isGliding",
+            isGliding);
+        Debug.Log("isGliding" + isGliding.ToString());
+
+        // Check for Running
+
+        if (MoveAction.ReadValue<Vector2>().x > 0 || MoveAction.ReadValue<Vector2>().x < 0)
+        {
+            isRunning = true;
+            waitingForIdle = false;
+        }
+        else if (playerRb.linearVelocity.x < 0 || playerRb.linearVelocity.x > 0)
+        {
+            isRunning = true;
+            waitingForIdle = false;
+        }
+        else
+        {
+            // Wait for timeToStartIdling to stop running animation
+            if (isRunning && waitingForIdle && (Time.timeAsDouble > (timeSinceStoppedRunning + timeToStartIdling)))
+            {
+                isRunning = false;
+                waitingForIdle = false;
+            }
+
+            if (!waitingForIdle && isRunning) // Start waiting for idle
+            {
+                waitingForIdle = true;
+                timeSinceStoppedRunning = Time.timeAsDouble;
+            }
+            
+        }
+
+        // Update isRunning
+        playerAnimator.SetBool("isRunning", isRunning);
+        Debug.Log("IsRunning" + isRunning.ToString());
+
+        // Update onGround in animator
+        playerAnimator.SetBool("onGround", onGround);
+        Debug.Log("onGround" + onGround.ToString());
 
         // Get 
         if (playerRb.linearVelocity.x > 0)
