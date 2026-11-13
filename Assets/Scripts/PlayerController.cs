@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -143,6 +144,18 @@ public class PlayerController : MonoBehaviour
         // Waiting for Idle Debounce
         timeSinceStoppedRunning = Time.timeAsDouble;
         waitingForIdle = false;
+
+        // Set camera target to this gameobject
+        GameObject cam = GameObject.FindGameObjectWithTag("CineCam");
+        CinemachineCamera c_cam = cam.GetComponent<CinemachineCamera>();
+        //c_cam
+
+        c_cam.Target.TrackingTarget = this.gameObject.transform;
+        //Component[] components = cam.GetComponents(typeof(Component));
+        //foreach (Component component in components)
+        //{
+        //    Debug.Log(component.ToString());
+        //}
     }
 
     private void OnDestroy()
